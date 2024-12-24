@@ -1,7 +1,7 @@
 .PHONY: all download decompress process sql-load clean
 
 DATA_DIR = data
-SCRIPT = imbd_to_mysql.py
+SCRIPT = imbd_to_mysql_script.py
 DB = imbd
 # PG_USER = postgres
 
