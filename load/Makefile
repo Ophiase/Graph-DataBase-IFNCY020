@@ -1,11 +1,12 @@
 .PHONY: all download decompress process sql-load clean
 
 DATA_DIR = data
-SCRIPT = imbd_to_mysql_script.py
+SCRIPT = imbd_to_psql.py
+SQL_SCRIPT = script.sql
 DB = imbd
 # PG_USER = postgres
 
-all: download decompress process sql-load clean
+all: download decompress process sql-load # clean
 
 download:
 	@mkdir -p $(DATA_DIR)
@@ -24,7 +25,7 @@ process:
 	python $(SCRIPT)
 
 sql-load:
-	psql -d $(DB) -f output.sql
+	cd data; psql -d $(DB) -f $(SQL_SCRIPT)
 
 clean:
 	rm -rf $(DATA_DIR)/*.tsv

@@ -3,12 +3,27 @@
 ###################################################################################
 
 import time
+import os
 
 ###################################################################################
 
 GROUP_SIZE = 1000
 MAX_LINE = 100000
 FOLDER = "data"
+
+FINAL_SCRIPT_NAME = "script.sql"
+FINAL_SCRIPT = """\i name_basics.sql
+\i name_knownForTitles.sql
+\i name_professions.sql
+\i work_akas.sql
+\i work_basics.sql
+\i work_director.sql
+\i work_episode.sql
+\i work_genres.sql
+\i work_principals.sql
+\i work_ratings.sql
+\i work_types.sql
+\i work_writer.sql"""
 
 ###################################################################################
 
@@ -719,13 +734,22 @@ def generate_title_crew(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
             print("File work_writer.sql created")
             print()
 
+def generate_script() -> None:
+    print("[CREATE] script.sql")
+    with open(os.path.join(FOLDER, FINAL_SCRIPT_NAME), 'w') as file :
+        file.write(FINAL_SCRIPT)
+
 ###################################################################################
 
+def main() -> None:
+    generate_work_basics()
+    generate_work_principals()
+    generate_work_akas()
+    generate_work_ratings()
+    generate_work_episode()
+    generate_name_basics()
+    generate_title_crew()
+    generate_script()
 
-generate_work_basics()
-generate_work_principals()
-generate_work_akas()
-generate_work_ratings()
-generate_work_episode()
-generate_name_basics()
-generate_title_crew()
+if __name__ == "__main__":
+    main()
