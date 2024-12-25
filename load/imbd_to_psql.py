@@ -33,13 +33,13 @@ def generate_work_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
     with open(FOLDER + "/" + "title.basics.tsv", 'r', encoding="utf8") as file:
         with open(FOLDER + "/" + 'work_basics.sql', 'w', encoding="utf8") as output_file, open(FOLDER + "/" + 'work_genres.sql', 'w', encoding="utf8") as genre_file:
 
-            output_file.write("DROP TABLE IF EXISTS `work_basics`;\n")
+            output_file.write("DROP TABLE IF EXISTS \"work_basics\";\n")
 
-            output_file.write("CREATE TABLE `work_basics` (id_work INT UNSIGNED, worktype ENUM('tvEpisode', 'tvMiniSeries', 'short', 'tvMovie', 'tvSeries', 'tvShort', 'video', 'videoGame', 'movie', 'tvSpecial', 'tvPilot'), primaryTitle VARCHAR(1000), originalTitle VARCHAR(1000), isAdult TINYINT, startYear SMALLINT, endYear SMALLINT, runtimeMinutes MEDIUMINT UNSIGNED);\n")
+            output_file.write("CREATE TABLE \"work_basics\" (id_work SERIAL PRIMARY KEY, worktype VARCHAR(50), primaryTitle VARCHAR(1000), originalTitle VARCHAR(1000), isAdult SMALLINT, startYear SMALLINT, endYear SMALLINT, runtimeMinutes INTEGER);\n")
 
-            genre_file.write("DROP TABLE IF EXISTS `work_genres`;\n")
+            genre_file.write("DROP TABLE IF EXISTS \"work_genres\";\n")
 
-            genre_file.write("CREATE TABLE `work_genres` (id_work INT UNSIGNED, genre ENUM('Romance', 'Talk-Show', 'Drama', 'Fantasy', 'Action', 'Sci-Fi', 'Animation', 'Thriller', 'Comedy', 'Documentary', 'Reality-TV', 'Adventure', 'Mystery', 'Film-Noir', 'Game-Show', 'Horror', 'Music', 'Family', 'Adult', 'Sport', 'War', 'Biography', 'History', 'Crime', 'News', 'Western', 'Musical', 'Short'));\n")
+            genre_file.write("CREATE TABLE \"work_genres\" (id_work INTEGER, genre VARCHAR(50), PRIMARY KEY (id_work, genre));\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -61,7 +61,7 @@ def generate_work_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
                     print(nb, "line processed:", temps, "seconds")
 
                 if nb % group_size == 1:
-                    output_file.write("INSERT INTO `work_basics` VALUES ")
+                    output_file.write("INSERT INTO \"work_basics\" VALUES ")
                 # On enlève le retour chariot
                 cleanLine = line[:-1]
 
@@ -89,7 +89,7 @@ def generate_work_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
                         nb_genre += 1
                         if nb_genre % group_size == 1:
                             genre_file.write(
-                                "INSERT INTO `work_genres` VALUES ")
+                                "INSERT INTO \"work_genres\" VALUES ")
                         values = "({}, {})"
                         if nb_genre % group_size == 0:
                             genre_file.write(
@@ -144,9 +144,9 @@ def generate_work_principals(group_size: int = GROUP_SIZE, max_line: int = MAX_L
     with open(FOLDER + "/" + "title.principals.tsv", 'r', encoding="utf8") as file:
         with open(FOLDER + "/" + 'work_principals.sql', 'w', encoding="utf8") as output_file:
 
-            output_file.write("DROP TABLE IF EXISTS `work_principals`;\n")
+            output_file.write("DROP TABLE IF EXISTS \"work_principals\";\n")
 
-            output_file.write("CREATE TABLE IF NOT EXISTS `work_principals` (`id_work` INT UNSIGNED, `ordering` TINYINT UNSIGNED, `id_person` INT UNSIGNED, `category` ENUM('archive_footage', 'editor', 'self', 'writer', 'production_designer', 'cinematographer', 'producer', 'casting_director', 'archive_sound', 'actor', 'director', 'actress', 'composer'), `job` VARCHAR(500), `characters` VARCHAR(1400));\n")
+            output_file.write("CREATE TABLE IF NOT EXISTS \"work_principals\" (id_work SERIAL PRIMARY KEY, ordering SMALLINT, id_person INTEGER, category VARCHAR(50), job VARCHAR(500), characters VARCHAR(1400));\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -167,7 +167,7 @@ def generate_work_principals(group_size: int = GROUP_SIZE, max_line: int = MAX_L
                     print(nb, "line processed:", temps, "seconds")
 
                 if nb % group_size == 1:
-                    output_file.write("INSERT INTO `work_principals` VALUES ")
+                    output_file.write("INSERT INTO \"work_principals\" VALUES ")
                 # On enlève le retour chariot
                 cleanLine = line[:-1]
 
@@ -217,16 +217,30 @@ def generate_work_akas(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
     with open(FOLDER + "/" + "title.akas.tsv", 'r', encoding="utf8") as file:
         with open(FOLDER + "/" + 'work_akas.sql', 'w', encoding="utf8") as output_file, open(FOLDER + "/" + 'work_types.sql', 'w', encoding="utf8") as types_file:
 
-            output_file.write("DROP TABLE IF EXISTS `work_akas`;\n")
+            output_file.write("DROP TABLE IF EXISTS \"work_akas\";\n")
 
             output_file.write(
-                "CREATE TABLE `work_akas` (id_work INT UNSIGNED, ordering SMALLINT UNSIGNED, title VARCHAR(1000), region VARCHAR(4), language VARCHAR(3), attributes VARCHAR(200), isOriginalTitle TINYINT);\n")
+                "CREATE TABLE \"work_akas\" ("
+                "id_work SERIAL PRIMARY KEY, "
+                "ordering SMALLINT, "
+                "title VARCHAR(1000), "
+                "region VARCHAR(4), "
+                "language VARCHAR(3), "
+                "attributes VARCHAR(200), "
+                "isOriginalTitle SMALLINT"
+                ");\n"
+            )
 
-            types_file.write("DROP TABLE IF EXISTS `work_types`;\n")
+            types_file.write("DROP TABLE IF EXISTS \"work_types\";\n")
 
             types_file.write(
-                "CREATE TABLE `work_types` (id_work INT UNSIGNED, ordering SMALLINT UNSIGNED, type ENUM('alternative', 'dvd', 'festival', 'tv', 'video', 'working', 'original', 'imdbDisplay'));\n")
-
+                "CREATE TABLE \"work_types\" ("
+                "id_work SERIAL PRIMARY KEY, "
+                "ordering SMALLINT, "
+                "type VARCHAR(50) CHECK (type IN ('alternative', 'dvd', 'festival', 'tv', 'video', 'working', 'original', 'imdbDisplay'))"
+                ");\n"
+            )
+            
             # On évacue la première ligne avec le nom des champs
             file.readline()
 
@@ -246,7 +260,7 @@ def generate_work_akas(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
                     print(nb, "line processed:", temps, "seconds")
 
                 if nb % group_size == 1:
-                    output_file.write("INSERT INTO `work_akas` VALUES ")
+                    output_file.write("INSERT INTO \"work_akas\" VALUES ")
                 # On enlève le retour chariot
                 cleanLine = line[:-1]
 
@@ -276,7 +290,7 @@ def generate_work_akas(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
                         nb_typ += 1
                         if nb_typ % group_size == 1:
                             types_file.write(
-                                "INSERT INTO `work_types` VALUES ")
+                                "INSERT INTO \"work_types\" VALUES ")
                         values = "({}, {}, {})"
                         if nb_typ % group_size == 0:
                             types_file.write(
@@ -319,10 +333,10 @@ def generate_work_ratings(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
     with open(FOLDER + "/" + "title.ratings.tsv", 'r', encoding="utf8") as file:
         with open(FOLDER + "/" + 'work_ratings.sql', 'w', encoding="utf8") as output_file:
 
-            output_file.write("DROP TABLE IF EXISTS `work_ratings`;\n")
+            output_file.write("DROP TABLE IF EXISTS \"work_ratings\";\n")
 
             output_file.write(
-                "CREATE TABLE `work_ratings` (id_work INT UNSIGNED, averageRating DECIMAL(3,1), numVotes INT UNSIGNED);\n")
+                "CREATE TABLE \"work_ratings\" (id_work SERIAL PRIMARY KEY, averageRating DECIMAL(3,1), numVotes SERIAL PRIMARY KEY);\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -342,7 +356,7 @@ def generate_work_ratings(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
                     print(nb, "line processed:", temps, "seconds")
 
                 if nb % group_size == 1:
-                    output_file.write("INSERT INTO `work_ratings` VALUES ")
+                    output_file.write("INSERT INTO \"work_ratings\" VALUES ")
                 # On enlève le retour chariot
                 cleanLine = line[:-1]
 
@@ -379,10 +393,15 @@ def generate_work_episode(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
     with open(FOLDER + "/" + "title.episode.tsv", 'r', encoding="utf8") as file:
         with open(FOLDER + "/" + 'work_episode.sql', 'w', encoding="utf8") as output_file:
 
-            output_file.write("DROP TABLE IF EXISTS `work_episode`;\n")
+            output_file.write("DROP TABLE IF EXISTS \"work_episode\";\n")
 
             output_file.write(
-                "CREATE TABLE `work_episode` (id_work INT UNSIGNED, id_work_parent INT UNSIGNED, seasonNumber SMALLINT UNSIGNED, episodeNumber MEDIUMINT UNSIGNED);\n")
+                "CREATE TABLE \"work_episode\" ("
+                "id_work SERIAL PRIMARY KEY, "
+                "id_work_parent INTEGER, "
+                "seasonNumber SMALLINT, "
+                "episodeNumber INTEGER"
+                ");\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -404,7 +423,7 @@ def generate_work_episode(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
                     print(nb, "line processed:", temps, "seconds")
 
                 if nb % group_size == 1:
-                    output_file.write("INSERT INTO `work_episode` VALUES ")
+                    output_file.write("INSERT INTO \"work_episode\" VALUES ")
                 # On enlève le retour chariot
                 cleanLine = line[:-1]
 
@@ -446,24 +465,23 @@ def generate_name_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
     print("[CREATE]  name_basics.sql, name_professions.sql and name_knownForTitles.sql")
     with open(FOLDER + "/" + "name.basics.tsv", 'r', encoding="utf8") as file:
         with open(FOLDER + "/" + 'name_basics.sql', 'w', encoding="utf8") as output_file, open(FOLDER + "/" + 'name_professions.sql', 'w', encoding="utf8") as profession_file, open(FOLDER + "/" + 'name_knownForTitles.sql', 'w', encoding="utf8") as known_file:
-
-            output_file.write("DROP TABLE IF EXISTS `name_basics`;\n")
+            output_file.write("DROP TABLE IF EXISTS name_basics;\n")
 
             output_file.write(
-                "CREATE TABLE `name_basics` (id_person INT UNSIGNED, name VARCHAR(200), birthYear SMALLINT, deathYear SMALLINT);\n")
+                "CREATE TABLE name_basics (id_person SERIAL PRIMARY KEY, name VARCHAR(200), birthYear SMALLINT, deathYear SMALLINT);\n")
 
             # Professions
 
-            profession_file.write("DROP TABLE IF EXISTS `name_professions`;\n")
+            profession_file.write("DROP TABLE IF EXISTS name_professions;\n")
 
-            profession_file.write("CREATE TABLE `name_professions` (id_person INT UNSIGNED, profession ENUM('music_department', 'podcaster', 'publicist', 'soundtrack', 'make_up_department', 'archive_footage', 'cinematographer', 'casting_director', 'production_manager', 'art_director', 'animation_department', 'actress', 'script_department', 'choreographer', 'editorial_department', 'accountant', 'talent_agent', 'executive', 'sound_department', 'set_decorator', 'producer', 'transportation_department', 'camera_department', 'location_management', 'director', 'composer', 'visual_effects', 'special_effects', 'legal', 'stunts', 'archive_sound', 'art_department', 'costume_designer', 'music_artist', 'production_designer', 'costume_department', 'actor', 'miscellaneous', 'casting_department', 'manager', 'assistant', 'electrical_department', 'assistant_director', 'production_department', 'writer', 'editor'));\n")
+            profession_file.write("CREATE TABLE name_professions (id_person INTEGER, profession VARCHAR(50), PRIMARY KEY (id_person, profession));\n")
 
             # knownForTitles
 
-            known_file.write("DROP TABLE IF EXISTS `name_knownForTitles`;\n")
+            known_file.write("DROP TABLE IF EXISTS name_knownForTitles;\n")
 
             known_file.write(
-                "CREATE TABLE `name_knownForTitles` (id_person INT UNSIGNED, id_work INT UNSIGNED);\n")
+                "CREATE TABLE name_knownForTitles (id_person INTEGER, id_work INTEGER, PRIMARY KEY (id_person, id_work));\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -487,7 +505,7 @@ def generate_name_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
                     print(nb, "line processed:", temps, "seconds")
 
                 if nb % group_size == 1:
-                    output_file.write("INSERT INTO `name_basics` VALUES ")
+                    output_file.write("INSERT INTO \"name_basics\" VALUES ")
                 # On enlève le retour chariot
                 cleanLine = line[:-1]
 
@@ -516,7 +534,7 @@ def generate_name_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
                         nb_prof += 1
                         if nb_prof % group_size == 1:
                             profession_file.write(
-                                "INSERT INTO `name_professions` VALUES ")
+                                "INSERT INTO \"name_professions\" VALUES ")
                         values = "({}, {})"
                         if nb_prof % group_size == 0:
                             profession_file.write(
@@ -539,7 +557,7 @@ def generate_name_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
                         known_id = known_id[2:].lstrip("0")
                         if nb_known % group_size == 1:
                             known_file.write(
-                                "INSERT INTO `name_knownForTitles` VALUES ")
+                                "INSERT INTO \"name_knownForTitles\" VALUES ")
                         values = "({}, {})"
                         if nb_known % group_size == 0:
                             known_file.write(
@@ -599,10 +617,10 @@ def generate_title_crew(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
     with open(FOLDER + "/" + "title.crew.tsv", 'r', encoding="utf8") as file:
         with open(FOLDER + "/" + 'work_director.sql', 'w', encoding="utf8") as output_file:
 
-            output_file.write("DROP TABLE IF EXISTS `work_director`;\n")
+            output_file.write("DROP TABLE IF EXISTS \"work_director\";\n")
 
             output_file.write(
-                "CREATE TABLE `work_director` (id_work INT UNSIGNED, id_person INT UNSIGNED);\n")
+                "CREATE TABLE \"work_director\" (id_work INTEGER, id_person INTEGER, PRIMARY KEY (id_work, id_person));\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -641,7 +659,7 @@ def generate_title_crew(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
                         nb_insert = nb_insert + 1
                         if nb_insert % group_size == 1:
                             output_file.write(
-                                "INSERT INTO `work_director` VALUES ")
+                                "INSERT INTO \"work_director\" VALUES ")
                         # On insère la ligne
                         if nb_insert % group_size == 0:
                             output_file.write(
@@ -668,10 +686,10 @@ def generate_title_crew(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
     with open(FOLDER + "/" + "title.crew.tsv", 'r', encoding="utf8") as file:
         with open(FOLDER + "/" + 'work_writer.sql', 'w', encoding="utf8") as output_file:
 
-            output_file.write("DROP TABLE IF EXISTS `work_writer`;\n")
+            output_file.write("DROP TABLE IF EXISTS \"work_writer\";\n")
 
             output_file.write(
-                "CREATE TABLE `work_writer` (id_work INT UNSIGNED, id_person INT UNSIGNED);\n")
+                "CREATE TABLE \"work_writer\" (id_work SERIAL PRIMARY KEY, id_person SERIAL PRIMARY KEY);\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -711,7 +729,7 @@ def generate_title_crew(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
                         nb_insert = nb_insert + 1
                         if nb_insert % group_size == 1:
                             output_file.write(
-                                "INSERT INTO `work_writer` VALUES ")
+                                "INSERT INTO \"work_writer\" VALUES ")
                         # On insère la ligne
                         if nb_insert % group_size == 0:
                             output_file.write(
