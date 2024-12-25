@@ -27,5 +27,9 @@ process:
 sql-load:
 	cd data; psql -d $(DB) -f $(SQL_SCRIPT)
 
+glimpse:
+	mkdir -p resume
+	for file in data/*.tsv; do head -20 "$$file" > "resume/$$(basename $$file)"; done
+
 clean:
 	rm -rf $(DATA_DIR)/*.tsv

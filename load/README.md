@@ -5,7 +5,9 @@
         - https://kxs.fr/outils/imdb-database
             - Tables: https://datasets.imdbws.com/
 
-I'm not the author of the .py script
+I've modified `original_script_from_website.py` to `imbd_to_psql.py`.
+
+## Installation
 
 ```bash
 # Download

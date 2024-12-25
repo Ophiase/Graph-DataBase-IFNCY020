@@ -8,7 +8,7 @@ import os
 ###################################################################################
 
 GROUP_SIZE = 1000
-MAX_LINE = 1
+MAX_LINE = 10000
 FOLDER = "data"
 
 FINAL_SCRIPT_NAME = "script.sql"
