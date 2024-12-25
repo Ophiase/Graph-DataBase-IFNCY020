@@ -124,7 +124,7 @@ def generate_work_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
             output_file.write(
                 "CREATE INDEX IX_worktype ON work_basics (worktype);\n")
             output_file.write(
-                "CREATE INDEX IX_originalTitle ON work_basics (originalTitle(50));\n")
+                "CREATE INDEX IX_originalTitle ON work_basics (originalTitle);\n")
             output_file.write(
                 "CREATE INDEX IX_startYear ON work_basics (startYear);\n")
             output_file.write(
@@ -146,7 +146,7 @@ def generate_work_principals(group_size: int = GROUP_SIZE, max_line: int = MAX_L
 
             output_file.write("DROP TABLE IF EXISTS \"work_principals\";\n")
 
-            output_file.write("CREATE TABLE IF NOT EXISTS \"work_principals\" (id_work SERIAL PRIMARY KEY, ordering SMALLINT, id_person INTEGER, category VARCHAR(50), job VARCHAR(500), characters VARCHAR(1400));\n")
+            output_file.write("CREATE TABLE IF NOT EXISTS \"work_principals\" (id_work INTEGER, ordering SMALLINT, id_person INTEGER, category VARCHAR(50), job VARCHAR(500), characters VARCHAR(1400), PRIMARY KEY (id_work, ordering));\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -221,13 +221,14 @@ def generate_work_akas(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
 
             output_file.write(
                 "CREATE TABLE \"work_akas\" ("
-                "id_work SERIAL PRIMARY KEY, "
+                "id_work INTEGER, "
                 "ordering SMALLINT, "
                 "title VARCHAR(1000), "
                 "region VARCHAR(4), "
                 "language VARCHAR(3), "
                 "attributes VARCHAR(200), "
-                "isOriginalTitle SMALLINT"
+                "isOriginalTitle SMALLINT, "
+                "PRIMARY KEY (id_work, ordering)"
                 ");\n"
             )
 
@@ -235,9 +236,10 @@ def generate_work_akas(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
 
             types_file.write(
                 "CREATE TABLE \"work_types\" ("
-                "id_work SERIAL PRIMARY KEY, "
+                "id_work INTEGER, "
                 "ordering SMALLINT, "
-                "type VARCHAR(50) CHECK (type IN ('alternative', 'dvd', 'festival', 'tv', 'video', 'working', 'original', 'imdbDisplay'))"
+                "type VARCHAR(50) CHECK (type IN ('alternative', 'dvd', 'festival', 'tv', 'video', 'working', 'original', 'imdbDisplay')), "
+                "PRIMARY KEY (id_work, ordering)"
                 ");\n"
             )
             
@@ -336,7 +338,7 @@ def generate_work_ratings(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
             output_file.write("DROP TABLE IF EXISTS \"work_ratings\";\n")
 
             output_file.write(
-                "CREATE TABLE \"work_ratings\" (id_work SERIAL PRIMARY KEY, averageRating DECIMAL(3,1), numVotes SERIAL PRIMARY KEY);\n")
+                "CREATE TABLE \"work_ratings\" (id_work INTEGER PRIMARY KEY, averageRating DECIMAL(3,1), numVotes INTEGER);\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
@@ -397,7 +399,7 @@ def generate_work_episode(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
 
             output_file.write(
                 "CREATE TABLE \"work_episode\" ("
-                "id_work SERIAL PRIMARY KEY, "
+                "id_work INTEGER PRIMARY KEY, "
                 "id_work_parent INTEGER, "
                 "seasonNumber SMALLINT, "
                 "episodeNumber INTEGER"
@@ -468,7 +470,7 @@ def generate_name_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
             output_file.write("DROP TABLE IF EXISTS name_basics;\n")
 
             output_file.write(
-                "CREATE TABLE name_basics (id_person SERIAL PRIMARY KEY, name VARCHAR(200), birthYear SMALLINT, deathYear SMALLINT);\n")
+                "CREATE TABLE name_basics (id_person INTEGER PRIMARY KEY, name VARCHAR(200), birthYear SMALLINT, deathYear SMALLINT);\n")
 
             # Professions
 
@@ -689,7 +691,7 @@ def generate_title_crew(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
             output_file.write("DROP TABLE IF EXISTS \"work_writer\";\n")
 
             output_file.write(
-                "CREATE TABLE \"work_writer\" (id_work SERIAL PRIMARY KEY, id_person SERIAL PRIMARY KEY);\n")
+                "CREATE TABLE \"work_writer\" (id_work INTEGER, id_person INTEGER, PRIMARY KEY (id_work, id_person));\n")
 
             # On évacue la première ligne avec le nom des champs
             file.readline()
