@@ -1,3 +1,5 @@
+# This is the original script I found on the website
+
 # v1.1
 # Ajout des nouvelles catÃ©gories dans work_principals
 # Ajout des nouvelles professions dans name_profession
