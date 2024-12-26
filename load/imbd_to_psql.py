@@ -33,7 +33,7 @@ def generate_work_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
     with open(os.path.join(FOLDER, "title.basics.tsv"), 'r', encoding="utf8") as file:
         with open(os.path.join(FOLDER, 'work_basics.sql'), 'w', encoding="utf8") as output_file, open(os.path.join(FOLDER, 'work_genres.sql'), 'w', encoding="utf8") as genre_file:
             output_file.write("DROP TABLE IF EXISTS work_basics CASCADE;\n")
-            output_file.write("CREATE TABLE work_basics (id_work SERIAL PRIMARY KEY, worktype VARCHAR(50), primaryTitle VARCHAR(1000), originalTitle VARCHAR(1000), is_adult SMALLINT, start_year SMALLINT, end_year SMALLINT, runtime_minutes INTEGER);\n")
+            output_file.write("CREATE TABLE work_basics (id_work SERIAL PRIMARY KEY, worktype VARCHAR(50), primary_title VARCHAR(1000), original_title VARCHAR(1000), is_adult SMALLINT, start_year SMALLINT, end_year SMALLINT, runtime_minutes INTEGER);\n")
             genre_file.write("DROP TABLE IF EXISTS work_genres CASCADE;\n")
             genre_file.write(
                 "CREATE TABLE work_genres (id_work INTEGER, genre VARCHAR(50), PRIMARY KEY (id_work, genre));\n")
@@ -93,9 +93,9 @@ def generate_work_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
             output_file.write(
                 "CREATE INDEX IX_worktype ON work_basics (worktype);\n")
             output_file.write(
-                "DROP INDEX IF EXISTS IX_originalTitle;\n")
+                "DROP INDEX IF EXISTS IX_original_title;\n")
             output_file.write(
-                "CREATE INDEX IX_originalTitle ON work_basics (originalTitle);\n")
+                "CREATE INDEX IX_original_title ON work_basics (original_title);\n")
             output_file.write(
                 "DROP INDEX IF EXISTS IX_start_year;\n")
             output_file.write(
