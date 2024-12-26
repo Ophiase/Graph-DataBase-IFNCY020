@@ -13,7 +13,7 @@ FOLDER = "data"
 
 FINAL_SCRIPT_NAME = "script.sql"
 FINAL_SCRIPT = """\i name_basics.sql
-\i name_knownForTitles.sql
+\i name_known_for_titles.sql
 \i name_professions.sql
 \i work_akas.sql
 \i work_basics.sql
@@ -33,7 +33,7 @@ def generate_work_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
     with open(os.path.join(FOLDER, "title.basics.tsv"), 'r', encoding="utf8") as file:
         with open(os.path.join(FOLDER, 'work_basics.sql'), 'w', encoding="utf8") as output_file, open(os.path.join(FOLDER, 'work_genres.sql'), 'w', encoding="utf8") as genre_file:
             output_file.write("DROP TABLE IF EXISTS work_basics CASCADE;\n")
-            output_file.write("CREATE TABLE work_basics (id_work SERIAL PRIMARY KEY, worktype VARCHAR(50), primaryTitle VARCHAR(1000), originalTitle VARCHAR(1000), isAdult SMALLINT, startYear SMALLINT, endYear SMALLINT, runtimeMinutes INTEGER);\n")
+            output_file.write("CREATE TABLE work_basics (id_work SERIAL PRIMARY KEY, worktype VARCHAR(50), primaryTitle VARCHAR(1000), originalTitle VARCHAR(1000), is_adult SMALLINT, start_year SMALLINT, end_year SMALLINT, runtime_minutes INTEGER);\n")
             genre_file.write("DROP TABLE IF EXISTS work_genres CASCADE;\n")
             genre_file.write(
                 "CREATE TABLE work_genres (id_work INTEGER, genre VARCHAR(50), PRIMARY KEY (id_work, genre));\n")
@@ -97,13 +97,13 @@ def generate_work_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
             output_file.write(
                 "CREATE INDEX IX_originalTitle ON work_basics (originalTitle);\n")
             output_file.write(
-                "DROP INDEX IF EXISTS IX_startYear;\n")
+                "DROP INDEX IF EXISTS IX_start_year;\n")
             output_file.write(
-                "CREATE INDEX IX_startYear ON work_basics (startYear);\n")
+                "CREATE INDEX IX_start_year ON work_basics (start_year);\n")
             output_file.write(
-                "DROP INDEX IF EXISTS IX_runtimeMinutes;\n")
+                "DROP INDEX IF EXISTS IX_runtime_minutes;\n")
             output_file.write(
-                "CREATE INDEX IX_runtimeMinutes ON work_basics (runtimeMinutes);\n")
+                "CREATE INDEX IX_runtime_minutes ON work_basics (runtime_minutes);\n")
             genre_file.write(
                 "DROP INDEX IF EXISTS IX_id_work;\n")
             genre_file.write(
@@ -166,7 +166,7 @@ def generate_work_akas(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
     with open(os.path.join(FOLDER, "title.akas.tsv"), 'r', encoding="utf8") as file:
         with open(os.path.join(FOLDER, 'work_akas.sql'), 'w', encoding="utf8") as output_file, open(os.path.join(FOLDER, 'work_types.sql'), 'w', encoding="utf8") as types_file:
             output_file.write("DROP TABLE IF EXISTS work_akas CASCADE;\n")
-            output_file.write("CREATE TABLE work_akas (id_work INTEGER, ordering SMALLINT, title VARCHAR(1000), region VARCHAR(4), language VARCHAR(3), attributes VARCHAR(200), isOriginalTitle SMALLINT, PRIMARY KEY (id_work, ordering));\n")
+            output_file.write("CREATE TABLE work_akas (id_work INTEGER, ordering SMALLINT, title VARCHAR(1000), region VARCHAR(4), language VARCHAR(3), attributes VARCHAR(200), is_original_title SMALLINT, PRIMARY KEY (id_work, ordering));\n")
             types_file.write("DROP TABLE IF EXISTS work_types CASCADE;\n")
             types_file.write("CREATE TABLE work_types (id_work INTEGER, ordering SMALLINT, type VARCHAR(50) CHECK (type IN ('alternative', 'dvd', 'festival', 'tv', 'video', 'working', 'original', 'imdbDisplay')), PRIMARY KEY (id_work, ordering));\n")
             file.readline()
@@ -240,7 +240,7 @@ def generate_work_ratings(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
         with open(os.path.join(FOLDER, 'work_ratings.sql'), 'w', encoding="utf8") as output_file:
             output_file.write("DROP TABLE IF EXISTS work_ratings CASCADE;\n")
             output_file.write(
-                "CREATE TABLE work_ratings (id_work INTEGER PRIMARY KEY, averageRating DECIMAL(3,1), numVotes INTEGER);\n")
+                "CREATE TABLE work_ratings (id_work INTEGER PRIMARY KEY, average_rating DECIMAL(3,1), num_votes INTEGER);\n")
             file.readline()
             nb = 0
             debut = time.perf_counter()
@@ -277,7 +277,7 @@ def generate_work_episode(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
         with open(os.path.join(FOLDER, 'work_episode.sql'), 'w', encoding="utf8") as output_file:
             output_file.write("DROP TABLE IF EXISTS work_episode CASCADE;\n")
             output_file.write(
-                "CREATE TABLE work_episode (id_work INTEGER PRIMARY KEY, id_work_parent INTEGER, seasonNumber SMALLINT, episodeNumber INTEGER);\n")
+                "CREATE TABLE work_episode (id_work INTEGER PRIMARY KEY, id_work_parent INTEGER, season_number SMALLINT, episode_number INTEGER);\n")
             file.readline()
             nb = 0
             debut = time.perf_counter()
@@ -314,20 +314,20 @@ def generate_work_episode(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE
 
 
 def generate_name_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):
-    print("[CREATE] name_basics.sql, name_professions.sql and name_knownForTitles.sql")
+    print("[CREATE] name_basics.sql, name_professions.sql and name_known_for_titles.sql")
     with open(os.path.join(FOLDER, "name.basics.tsv"), 'r', encoding="utf8") as file:
-        with open(os.path.join(FOLDER, 'name_basics.sql'), 'w', encoding="utf8") as output_file, open(os.path.join(FOLDER, 'name_professions.sql'), 'w', encoding="utf8") as profession_file, open(os.path.join(FOLDER, 'name_knownForTitles.sql'), 'w', encoding="utf8") as known_file:
+        with open(os.path.join(FOLDER, 'name_basics.sql'), 'w', encoding="utf8") as output_file, open(os.path.join(FOLDER, 'name_professions.sql'), 'w', encoding="utf8") as profession_file, open(os.path.join(FOLDER, 'name_known_for_titles.sql'), 'w', encoding="utf8") as known_file:
             output_file.write("DROP TABLE IF EXISTS name_basics CASCADE;\n")
             output_file.write(
-                "CREATE TABLE name_basics (id_person INTEGER PRIMARY KEY, name VARCHAR(200), birthYear SMALLINT, deathYear SMALLINT);\n")
+                "CREATE TABLE name_basics (id_person INTEGER PRIMARY KEY, name VARCHAR(200), birth_year SMALLINT, death_year SMALLINT);\n")
             profession_file.write(
                 "DROP TABLE IF EXISTS name_professions CASCADE;\n")
             profession_file.write(
                 "CREATE TABLE name_professions (id_person INTEGER, profession VARCHAR(50), PRIMARY KEY (id_person, profession));\n")
             known_file.write(
-                "DROP TABLE IF EXISTS name_knownForTitles CASCADE;\n")
+                "DROP TABLE IF EXISTS name_known_for_titles CASCADE;\n")
             known_file.write(
-                "CREATE TABLE name_knownForTitles (id_person INTEGER, id_work INTEGER, PRIMARY KEY (id_person, id_work));\n")
+                "CREATE TABLE name_known_for_titles (id_person INTEGER, id_work INTEGER, PRIMARY KEY (id_person, id_work));\n")
             file.readline()
             nb = 0
             nb_prof = 0
@@ -376,7 +376,7 @@ def generate_name_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
                         known_id = known_id[2:].lstrip("0")
                         if nb_known % group_size == 1:
                             known_file.write(
-                                "INSERT INTO name_knownForTitles VALUES ")
+                                "INSERT INTO name_known_for_titles VALUES ")
                         values = "({}, {})".format(tabLine[0], known_id)
                         if nb_known % group_size == 0:
                             known_file.write(", " + values + ";\n")
@@ -410,14 +410,14 @@ def generate_name_basics(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE)
             known_file.write(
                 "DROP INDEX IF EXISTS IX_id_person;\n")
             known_file.write(
-                "CREATE INDEX IX_id_person ON name_knownForTitles (id_person);\n")
+                "CREATE INDEX IX_id_person ON name_known_for_titles (id_person);\n")
             known_file.write(
                 "DROP INDEX IF EXISTS IX_id_work;\n")
             known_file.write(
-                "CREATE INDEX IX_id_work ON name_knownForTitles (id_work);\n")
+                "CREATE INDEX IX_id_work ON name_known_for_titles (id_work);\n")
             print("File name_basics.sql created")
             print("File name_professions.sql created")
-            print("File name_knownForTitles.sql created")
+            print("File name_known_for_titles.sql created")
 
 
 def generate_title_crew(group_size: int = GROUP_SIZE, max_line: int = MAX_LINE):

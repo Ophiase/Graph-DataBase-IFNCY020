@@ -1,12 +1,19 @@
 .PHONY: all download decompress process sql-load clean
 
+###################################################################################
+
 DATA_DIR = data
 SCRIPT = imbd_to_psql.py
 SQL_SCRIPT = script.sql
 DB = imbd
-# PG_USER = postgres
 
-all: download decompress process sql-load # clean
+###################################################################################
+
+all: download_and_decompress glimpse tsv_to_psql # clean
+download_and_decompress: download decompress
+tsv_to_psql: process sql-load
+
+###################################################################################
 
 download:
 	@mkdir -p $(DATA_DIR)
