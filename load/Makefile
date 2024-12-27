@@ -1,17 +1,20 @@
-.PHONY: all download decompress process sql-load clean
+.PHONY: all download decompress process psql_load clean
 
 ###################################################################################
 
 DATA_DIR = data
-SCRIPT = imbd_to_psql.py
-SQL_SCRIPT = script.sql
-DB = imbd
+
+PSQL_GENERATION_SCRIPT = imbd_to_psql.py
+PSQL_LOAD_SCRIPT = script.sql
+NEO4J_SCRIPT  = psql_to_neo4j.py
+
+PSQL_DB = imbd
 
 ###################################################################################
 
-all: download_and_decompress glimpse tsv_to_psql # clean
+all: download_and_decompress glimpse tsv_to_psql psql_to_neo4j # clean
 download_and_decompress: download decompress
-tsv_to_psql: process sql-load
+tsv_to_psql: process psql_load
 
 ###################################################################################
 
@@ -29,10 +32,13 @@ decompress:
 	gunzip -f $(DATA_DIR)/*.tsv.gz
 
 process:
-	python $(SCRIPT)
+	python $(PSQL_GENERATION_SCRIPT)
 
-sql-load:
-	cd data; psql -d $(DB) -f $(SQL_SCRIPT)
+psql_load:
+	cd data; psql -d $(PSQL_DB) -f $(PSQL_LOAD_SCRIPT)
+
+psql_to_neo4j:
+	python $(NEO4J_SCRIPT)
 
 glimpse:
 	mkdir -p resume
