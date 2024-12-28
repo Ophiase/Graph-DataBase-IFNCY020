@@ -8,14 +8,14 @@ import os
 ###################################################################################
 
 GROUP_SIZE = 1000
-MAX_LINE = 10000
+MAX_LINE = 40000
 FOLDER = "data"
 
 FINAL_SCRIPT_NAME = "script.sql"
 FINAL_SCRIPT = """\i name_basics.sql
 \i name_known_for_titles.sql
 \i name_professions.sql
-\i work_akas.sql
+\i work_akas.sq
 \i work_basics.sql
 \i work_director.sql
 \i work_episode.sql

@@ -2,50 +2,12 @@ from py2neo import Graph, Node, Relationship
 from psycopg2 import connect
 from config import PG_DB, PG_HOST, PG_USER, PG_PASSWORD
 from config import NEO4J_AUTH, NEO4J_HOST
-from dataclasses import dataclass
+from psql_tables import Work, Akas, Episode, Genre, WorkType, Person, Profession, Director, Writer, KnownFor
 
 ###################################################################################
 
-@dataclass
-class Work:
-    id: int
-    worktype: str
-    primary_title: str
-    original_title: str
-    is_adult: int
-    start_year: int
-    end_year: int
-    runtime_minutes: int
-
-@dataclass
-class Akas:
-    id_work: int
-    ordering: int
-    title: str
-    region: str
-    language: str
-    attributes: str
-    is_original_title: int
-
-@dataclass
-class Episode:
-    id_work: int
-    id_work_parent: int
-    season_number: int
-    episode_number: int
-
-@dataclass
-class Genre:
-    id_work: int
-    genre: str
-
-@dataclass
-class WorkType:
-    id_work: int
-    ordering: int
-    type: str
-
-###################################################################################
+MAX_FETCH = 10000
+VERBOSE = True
 
 def connect_postgresql():
     return connect(
@@ -53,6 +15,7 @@ def connect_postgresql():
         user=PG_USER,
         password=PG_PASSWORD,
     )
+
 
 def connect_neo4j() -> Graph:
     graph = Graph(NEO4J_HOST, auth=NEO4J_AUTH)
@@ -73,8 +36,8 @@ def migrate_work(pg_connect, graph) -> None:
             """)
 
         while True:
-            print("Fetching...")
-            works = cur.fetchmany(1000)
+            if VERBOSE : print("Fetching...")
+            works = cur.fetchmany(MAX_FETCH)
             if not works:
                 break
 
@@ -106,7 +69,8 @@ def migrate_akas(pg_connect, graph) -> None:
             """)
 
         while True:
-            akas_list = cur.fetchmany(1000)
+            if VERBOSE : print("Fetching...")
+            akas_list = cur.fetchmany(MAX_FETCH)
             if not akas_list:
                 break
 
@@ -123,8 +87,10 @@ def migrate_akas(pg_connect, graph) -> None:
                 graph.create(akas_node)
                 work_node = graph.nodes.match("Work", id=akas.id_work).first()
                 if work_node:
-                    graph.create(Relationship(work_node, "HAS_AKAS", akas_node))
+                    graph.create(Relationship(
+                        work_node, "HAS_AKAS", akas_node))
         print("Inserted akas into Neo4j")
+
 
 def migrate_episode(pg_connect, graph) -> None:
     with pg_connect.cursor(name='episode_cursor') as cur:
@@ -135,43 +101,53 @@ def migrate_episode(pg_connect, graph) -> None:
             FROM work_episode
             """)
 
-        episodes = []
         while True:
-            episode_batch = cur.fetchmany(1000)
-            if not episode_batch:
+            if VERBOSE : print("Fetching...")
+            episodes = cur.fetchmany(MAX_FETCH)
+            if not episodes:
                 break
-            episodes.extend(episode_batch)
 
-        episode_nodes = {}
-        for episode_data in episodes:
-            episode = Episode(*episode_data)
-            episode_node = Node("Episode",
-                                id_work=episode.id_work,
-                                id_work_parent=episode.id_work_parent,
-                                season_number=episode.season_number,
-                                episode_number=episode.episode_number)
-            graph.create(episode_node)
-            episode_nodes[(episode.id_work_parent, episode.season_number, episode.episode_number)] = episode_node
+            for episode_data in episodes:
+                episode = Episode(*episode_data)
+                episode_node = Node("Episode",
+                                    id_work=episode.id_work,
+                                    id_work_parent=episode.id_work_parent,
+                                    season_number=episode.season_number,
+                                    episode_number=episode.episode_number)
+                graph.create(episode_node)
+                work_node = graph.nodes.match("Work", id=episode.id_work).first()
+                parent_work_node = graph.nodes.match("Work", id=episode.id_work_parent).first()
+                if work_node:
+                    graph.create(Relationship(episode_node, "IS_WORK", work_node))
+                if parent_work_node:
+                    graph.create(Relationship(episode_node, "IS_SUBWORK_OF", parent_work_node))
 
-            work_node = graph.nodes.match("Work", id=episode.id_work).first()
-            parent_work_node = graph.nodes.match("Work", id=episode.id_work_parent).first()
+    with pg_connect.cursor(name='episode_rel_cursor') as rel_cur:
+        rel_cur.execute(
+            """
+            SELECT 
+            id_work, id_work_parent, season_number, episode_number
+            FROM work_episode
+            """)
 
-            if work_node:
-                graph.create(Relationship(episode_node, "IS_WORK", work_node))
-            if parent_work_node:
-                graph.create(Relationship(episode_node, "IS_SUBWORK_OF", parent_work_node))
+        while True:
+            if VERBOSE : print("Fetching...")
+            episode_rels = rel_cur.fetchmany(MAX_FETCH)
+            if not episode_rels:
+                break
 
-        for key, episode_node in episode_nodes.items():
-            id_work_parent, season_number, episode_number = key
+            for episode_rel_data in episode_rels:
+                id_work_parent, season_number, episode_number = episode_rel_data[1], episode_rel_data[2], episode_rel_data[3]
+                if None in (id_work_parent, season_number, episode_number):
+                    continue
 
-            if None in (id_work_parent, season_number, episode_number):
-                continue
-            
-            next_episode_node = episode_nodes.get((id_work_parent, season_number, episode_number + 1))
-            if next_episode_node:
-                graph.create(Relationship(episode_node, "NEXT_EPISODE", next_episode_node))
+                episode_node = graph.nodes.match("Episode", id_work_parent=id_work_parent, season_number=season_number, episode_number=episode_number).first()
+                next_episode_node = graph.nodes.match("Episode", id_work_parent=id_work_parent, season_number=season_number, episode_number=episode_number + 1).first()
+                if episode_node and next_episode_node:
+                    graph.create(Relationship(episode_node, "NEXT_EPISODE", next_episode_node))
 
-        print("Inserted episodes into Neo4j")
+    print("Inserted episodes and relationships into Neo4j")
+
 
 def migrate_genre(pg_connect, graph) -> None:
     with pg_connect.cursor(name='genre_cursor') as cur:
@@ -183,20 +159,24 @@ def migrate_genre(pg_connect, graph) -> None:
             """)
 
         while True:
-            genres = cur.fetchmany(1000)
+            if VERBOSE : print("Fetching...")
+            genres = cur.fetchmany(MAX_FETCH)
             if not genres:
                 break
 
             for genre_data in genres:
                 genre = Genre(*genre_data)
-                genre_node = graph.nodes.match("Genre", name=genre.genre).first()
+                genre_node = graph.nodes.match(
+                    "Genre", name=genre.genre).first()
                 if not genre_node:
                     genre_node = Node("Genre", name=genre.genre)
                     graph.create(genre_node)
                 work_node = graph.nodes.match("Work", id=genre.id_work).first()
                 if work_node:
-                    graph.create(Relationship(work_node, "HAS_GENRE", genre_node))
+                    graph.create(Relationship(
+                        work_node, "HAS_GENRE", genre_node))
         print("Inserted genres into Neo4j")
+
 
 def migrate_work_type(pg_connect, graph) -> None:
     with pg_connect.cursor(name='work_type_cursor') as cur:
@@ -208,19 +188,23 @@ def migrate_work_type(pg_connect, graph) -> None:
             """)
 
         while True:
-            work_types = cur.fetchmany(1000)
+            if VERBOSE : print("Fetching...")
+            work_types = cur.fetchmany(MAX_FETCH)
             if not work_types:
                 break
 
             for work_type_data in work_types:
                 work_type = WorkType(*work_type_data)
-                work_type_node = graph.nodes.match("WorkType", type=work_type.type).first()
+                work_type_node = graph.nodes.match(
+                    "WorkType", type=work_type.type).first()
                 if not work_type_node:
                     work_type_node = Node("WorkType", type=work_type.type)
                     graph.create(work_type_node)
-                work_node = graph.nodes.match("Work", id=work_type.id_work).first()
+                work_node = graph.nodes.match(
+                    "Work", id=work_type.id_work).first()
                 if work_node:
-                    relationship = Relationship(work_node, "HAS_WORK_TYPE", work_type_node)
+                    relationship = Relationship(
+                        work_node, "HAS_WORK_TYPE", work_type_node)
                     relationship["ordering"] = work_type.ordering
                     graph.create(relationship)
         print("Inserted work types into Neo4j")
@@ -228,21 +212,131 @@ def migrate_work_type(pg_connect, graph) -> None:
 #########################################
 
 
-def migrate_person(pg_connect, graph) -> None: pass
+def migrate_person(pg_connect, graph) -> None:
+    with pg_connect.cursor(name='person_cursor') as cur:
+        cur.execute(
+            """
+            SELECT 
+            id_person, name, birth_year, death_year
+            FROM name_basics
+            """)
 
+        while True:
+            if VERBOSE : print("Fetching...")
+            persons = cur.fetchmany(MAX_FETCH)
+            if not persons:
+                break
 
-def migrate_profession(pg_connect, graph) -> None: pass
+            for person_data in persons:
+                person = Person(*person_data)
+                person_node = Node("Person",
+                                   id_person=person.id_person,
+                                   name=person.name,
+                                   birth_year=person.birth_year,
+                                   death_year=person.death_year)
+                graph.create(person_node)
+        print("Inserted persons into Neo4j")
 
-#########################################
+def migrate_profession(pg_connect, graph) -> None:
+    with pg_connect.cursor(name='profession_cursor') as cur:
+        cur.execute(
+            """
+            SELECT 
+            id_work, ordering, id_person, category, job, characters
+            FROM work_principals
+            """)
 
+        while True:
+            if VERBOSE : print("Fetching...")
+            professions = cur.fetchmany(MAX_FETCH)
+            if not professions:
+                break
 
-def migrate_has_director(pg_connect, graph) -> None: pass
+            for profession_data in professions:
+                profession = Profession(*profession_data)
+                profession_node = Node("Profession",
+                                       id_work=profession.id_work,
+                                       ordering=profession.ordering,
+                                       id_person=profession.id_person,
+                                       category=profession.category,
+                                       job=profession.job,
+                                       characters=profession.characters)
+                graph.create(profession_node)
+                work_node = graph.nodes.match("Work", id=profession.id_work).first()
+                person_node = graph.nodes.match("Person", id_person=profession.id_person).first()
+                if work_node and person_node:
+                    graph.create(Relationship(work_node, "HAS_PROFESSION", profession_node))
+                    graph.create(Relationship(profession_node, "BELONGS_TO", person_node))
+        print("Inserted professions into Neo4j")
 
+def migrate_has_director(pg_connect, graph) -> None:
+    with pg_connect.cursor(name='director_cursor') as cur:
+        cur.execute(
+            """
+            SELECT 
+            id_work, id_person
+            FROM work_director
+            """)
 
-def migrate_has_writer(pg_connect, graph) -> None: pass
+        while True:
+            if VERBOSE : print("Fetching...")
+            directors = cur.fetchmany(MAX_FETCH)
+            if not directors:
+                break
 
+            for director_data in directors:
+                director = Director(*director_data)
+                work_node = graph.nodes.match("Work", id=director.id_work).first()
+                person_node = graph.nodes.match("Person", id_person=director.id_person).first()
+                if work_node and person_node:
+                    graph.create(Relationship(work_node, "HAS_DIRECTOR", person_node))
+        print("Inserted directors into Neo4j")
 
-def migrate_known_for(pg_connect, graph) -> None: pass
+def migrate_has_writer(pg_connect, graph) -> None:
+    with pg_connect.cursor(name='writer_cursor') as cur:
+        cur.execute(
+            """
+            SELECT 
+            id_work, id_person
+            FROM work_writer
+            """)
+
+        while True:
+            if VERBOSE : print("Fetching...")
+            writers = cur.fetchmany(MAX_FETCH)
+            if not writers:
+                break
+
+            for writer_data in writers:
+                writer = Writer(*writer_data)
+                work_node = graph.nodes.match("Work", id=writer.id_work).first()
+                person_node = graph.nodes.match("Person", id_person=writer.id_person).first()
+                if work_node and person_node:
+                    graph.create(Relationship(work_node, "HAS_WRITER", person_node))
+        print("Inserted writers into Neo4j")
+
+def migrate_known_for(pg_connect, graph) -> None:
+    with pg_connect.cursor(name='known_for_cursor') as cur:
+        cur.execute(
+            """
+            SELECT 
+            id_person, id_work
+            FROM name_known_for_titles
+            """)
+
+        while True:
+            if VERBOSE : print("Fetching...")
+            known_for_list = cur.fetchmany(MAX_FETCH)
+            if not known_for_list:
+                break
+
+            for known_for_data in known_for_list:
+                known_for = KnownFor(*known_for_data)
+                person_node = graph.nodes.match("Person", id_person=known_for.id_person).first()
+                work_node = graph.nodes.match("Work", id=known_for.id_work).first()
+                if person_node and work_node:
+                    graph.create(Relationship(person_node, "KNOWN_FOR", work_node))
+        print("Inserted known_for relationships into Neo4j")
 
 ###################################################################################
 
