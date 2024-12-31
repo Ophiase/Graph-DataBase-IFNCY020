@@ -8,6 +8,7 @@ from psql_tables import Work, Akas, Episode, Genre, WorkType, Person, Profession
 
 MAX_FETCH = 10000
 VERBOSE = True
+RESET = True
 
 def connect_postgresql():
     return connect(
@@ -19,7 +20,7 @@ def connect_postgresql():
 
 def connect_neo4j() -> Graph:
     graph = Graph(NEO4J_HOST, auth=NEO4J_AUTH)
-    graph.delete_all()
+    if RESET: graph.delete_all()
     return graph
 
 ###################################################################################
