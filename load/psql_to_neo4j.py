@@ -27,7 +27,7 @@ def main() -> None:
     # migrate_has_director(pg_connect, graph)
     # migrate_has_writer(pg_connect, graph)
     # migrate_known_for(pg_connect, graph)
-    
+
     # create_indexes(graph)
 
 ###################################################################################
@@ -160,8 +160,9 @@ def migrate_episode(pg_connect, graph) -> None:
                 if parent_work_node:
                     graph.create(Relationship(
                         episode_node, "IS_SUBWORK_OF", parent_work_node))
-                    
+
     print("Inserted episodes and relationships into Neo4j")
+
 
 def add_next_episode(pg_connect, graph):
     query = """

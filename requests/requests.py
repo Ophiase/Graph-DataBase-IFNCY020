@@ -1,9 +1,9 @@
+from colorama import Fore, Style, init
+from load.config import NEO4J_AUTH, NEO4J_HOST
+from py2neo import Graph
+import os
 import sys
 sys.path.append("..")
-import os
-from py2neo import Graph
-from load.config import NEO4J_AUTH, NEO4J_HOST
-from colorama import Fore, Style, init
 
 ###################################################################################
 
