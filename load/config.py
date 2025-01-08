@@ -9,7 +9,6 @@ config = configparser.ConfigParser()
 config.read(CONFIG_PATH)
 
 
-
 ###################################################################################
 
 NEO4J_HOST = config["neo4j_database"]["host"]
@@ -24,3 +23,7 @@ PG_HOST = config["pg_database"]["host"]
 PG_DB = config["pg_database"]["database"]
 PG_USER = config["pg_database"]["user"]
 PG_PASSWORD = config["pg_database"]["password"]
+
+#########################################
+
+DUMP = config.get("misc", "dump", fallback="data/dump.txt")

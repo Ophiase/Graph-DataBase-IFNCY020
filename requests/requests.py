@@ -1,14 +1,16 @@
 import sys
+sys.path.append("..")
 import os
 from py2neo import Graph
 from load.config import NEO4J_AUTH, NEO4J_HOST
+from colorama import Fore, Style, init
 
 ###################################################################################
 
-
+init(autoreset=True)
 VERBOSE = True
 QUERY_FOLDER = "queries"
-LIMIT = 10
+LIMIT = 1
 
 ###################################################################################
 
@@ -32,10 +34,17 @@ def execute_queries(graph: Graph, queries: dict) -> None:
     for name, query in queries.items():
         limited_query = f"{query} LIMIT {LIMIT}"
         if VERBOSE:
-            print(f"Executing query '{name}': {limited_query}")
-        result = graph.run(limited_query)
-        for record in result:
-            print(record)
+            print(f"{Fore.CYAN}Executing query '{name}':{Style.RESET_ALL}")
+            print()
+            print(limited_query)
+
+        records = list(graph.run(limited_query))
+        if not records:
+            print(f"{Fore.RED}No output")
+        for record in records:
+            print(f"{Fore.GREEN}{record}{Style.RESET_ALL}")
+
+        print(f"{Fore.YELLOW}{'-'*40}{Style.RESET_ALL}")
 
 ###################################################################################
 

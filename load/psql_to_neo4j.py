@@ -9,23 +9,24 @@ from psql_tables import Work, Akas, Episode, Genre, WorkType, Person, Profession
 MAX_FETCH_BATCH = 10000
 MAX_FETCH_ITERATION = 5
 VERBOSE = True
-RESET = True
+RESET = False
 
 
 def main() -> None:
     pg_connect = connect_postgresql()
     graph = connect_neo4j()
 
-    migrate_work(pg_connect, graph)
-    migrate_akas(pg_connect, graph)
-    migrate_episode(pg_connect, graph)
-    migrate_genre(pg_connect, graph)
-    migrate_work_type(pg_connect, graph)
-    migrate_person(pg_connect, graph)
-    migrate_profession(pg_connect, graph)
-    migrate_has_director(pg_connect, graph)
-    migrate_has_writer(pg_connect, graph)
-    migrate_known_for(pg_connect, graph)
+    # migrate_work(pg_connect, graph)
+    # migrate_akas(pg_connect, graph)
+    # migrate_episode(pg_connect, graph)
+    add_next_episode(pg_connect, graph)
+    # migrate_genre(pg_connect, graph)
+    # migrate_work_type(pg_connect, graph)
+    # migrate_person(pg_connect, graph)
+    # migrate_profession(pg_connect, graph)
+    # migrate_has_director(pg_connect, graph)
+    # migrate_has_writer(pg_connect, graph)
+    # migrate_known_for(pg_connect, graph)
     
     # create_indexes(graph)
 
@@ -159,34 +160,25 @@ def migrate_episode(pg_connect, graph) -> None:
                 if parent_work_node:
                     graph.create(Relationship(
                         episode_node, "IS_SUBWORK_OF", parent_work_node))
-
-    with pg_connect.cursor(name='episode_rel_cursor') as rel_cur:
-        rel_cur.execute(
-            """
-            SELECT 
-            id_work, id_work_parent, season_number, episode_number
-            FROM work_episode
-            """)
-
-        for _ in range(MAX_FETCH_ITERATION):
-            if VERBOSE:
-                print("Fetching...")
-            episode_rels = rel_cur.fetchmany(MAX_FETCH_BATCH)
-            if not episode_rels:
-                break
-
-            for episode_rel_data in episode_rels:
-                id_work, season_number, episode_number = episode_rel_data[
-                    0], episode_rel_data[2], episode_rel_data[3]
-                if None in (id_work, season_number, episode_number):
-                    continue
-
-                episode_node = graph.nodes.match("Episode", id_work=id_work, season_number=season_number, episode_number=episode_number).first()
-                next_episode_node = graph.nodes.match("Episode", id_work=id_work, season_number=season_number, episode_number=episode_number + 1).first()
-                if episode_node and next_episode_node:
-                    graph.create(Relationship(episode_node, "NEXT_EPISODE", next_episode_node))
-
+                    
     print("Inserted episodes and relationships into Neo4j")
+
+def add_next_episode(pg_connect, graph):
+    query = """
+    MATCH
+    (e1:Episode)-[:IS_SUBWORK_OF]->(w:Work)<-[:IS_SUBWORK_OF]-(e2:Episode)
+    WHERE 
+    (e2.episode_number = e1.episode_number + 1)
+    AND
+    (e2.season_number = e1.season_number)
+    RETURN e1, e2
+    """
+    result = graph.run(query)
+    for record in result:
+        e1 = record['e1']
+        e2 = record['e2']
+        graph.create(Relationship(e1, "NEXT_EPISODE", e2))
+    print("Inserted NEXT_EPISODE into Neo4j")
 
 
 def migrate_genre(pg_connect, graph) -> None:
