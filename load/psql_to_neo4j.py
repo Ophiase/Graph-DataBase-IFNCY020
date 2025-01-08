@@ -6,16 +6,15 @@ from psql_tables import Work, Akas, Episode, Genre, WorkType, Person, Profession
 
 ###################################################################################
 
-MAX_FETCH_BATCH = 1000
+MAX_FETCH_BATCH = 10000
 MAX_FETCH_ITERATION = 5
 VERBOSE = True
-RESET = False
+RESET = True
 
 
 def main() -> None:
     pg_connect = connect_postgresql()
     graph = connect_neo4j()
-    # create_indexes(graph)
 
     migrate_work(pg_connect, graph)
     migrate_akas(pg_connect, graph)
@@ -27,6 +26,8 @@ def main() -> None:
     migrate_has_director(pg_connect, graph)
     migrate_has_writer(pg_connect, graph)
     migrate_known_for(pg_connect, graph)
+    
+    # create_indexes(graph)
 
 ###################################################################################
 
