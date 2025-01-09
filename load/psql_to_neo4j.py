@@ -9,7 +9,7 @@ from psql_tables import Work, Akas, Episode, Genre, WorkType, Person, Profession
 MAX_FETCH_BATCH = 10000
 MAX_FETCH_ITERATION = 5
 VERBOSE = True
-RESET = True
+RESET = False
 
 
 def main() -> None:

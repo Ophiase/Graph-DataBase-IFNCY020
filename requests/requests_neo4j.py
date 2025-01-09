@@ -1,15 +1,15 @@
-import sys
-sys.path.append("..")
-from colorama import Fore, Style, init
-from load.config import NEO4J_AUTH, NEO4J_HOST
-from py2neo import Graph
+import __init__
 import os
+from py2neo import Graph
+from load.config import NEO4J_AUTH, NEO4J_HOST
+from colorama import Fore, Style, init
+
 
 ###################################################################################
 
 init(autoreset=True)
 VERBOSE = True
-QUERY_FOLDER = "queries"
+QUERY_FOLDER = "queries_neo4j"
 LIMIT = 1
 
 ###################################################################################
