@@ -36,7 +36,7 @@ def load_queries(folder: str) -> dict:
 def execute_queries(pg_connect, queries: dict) -> None:
     with pg_connect.cursor() as cur:
         for name, query in queries.items():
-            limited_query = f"{query} LIMIT {LIMIT}"
+            limited_query = f"{query} \nLIMIT {LIMIT}"
             if VERBOSE:
                 print(f"{Fore.CYAN}Executing query '{name}':{Style.RESET_ALL}")
                 print()

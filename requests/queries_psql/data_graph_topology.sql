@@ -27,4 +27,5 @@ WHERE
     depth = 10
 
 -- Currently it returns each node the paths
--- Return an array of node, the request is even more complexe
+-- Return an array of node, the request is even more complex
+
