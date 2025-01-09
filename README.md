@@ -22,8 +22,8 @@ To execute the queries, navigate to the `requests` directory and run the followi
 
 ```bash
 cd requests
-python requests_neo4j.py
-python requests_psql.py
+python3 requests_neo4j.py
+python3 requests_psql.py
 ```
 
 These scripts will execute the queries located in the `requests/queries_neo4j` and `requests/queries_psql` directories, respectively.
