@@ -7,8 +7,6 @@ The dataset includes information about works, persons, genres, episodes, and the
 
 - [Loading the Dataset](#loading-the-dataset)
 - [Executing Queries](#executing-queries)
-    - [Neo4j Queries](#neo4j-queries)
-    - [PostgreSQL Queries](#postgresql-queries)
 - [Directory Structure](#directory-structure)
 
 ## Loading the Dataset
