@@ -10,7 +10,7 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 VERBOSE = True
 QUERY_FOLDER = "queries_psql"
-LIMIT = 1
+LIMIT = 3
 
 ###################################################################################
 
@@ -41,6 +41,7 @@ def execute_queries(pg_connect, queries: dict) -> None:
                 print(f"{Fore.CYAN}Executing query '{name}':{Style.RESET_ALL}")
                 print()
                 print(limited_query)
+                print()
 
             cur.execute(limited_query)
             records = cur.fetchall()

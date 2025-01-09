@@ -37,6 +37,7 @@ def execute_queries(graph: Graph, queries: dict) -> None:
             print(f"{Fore.CYAN}Executing query '{name}':{Style.RESET_ALL}")
             print()
             print(limited_query)
+            print()
 
         records = list(graph.run(limited_query))
         if not records:
