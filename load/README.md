@@ -14,6 +14,8 @@
 
 ## Installation
 
+### Rebuild everything from scratch
+
 ```bash
 # To execute all the following commands once
 make all
@@ -26,9 +28,14 @@ make decompress
 make glimpse
 
 # to PSQL
-make psql_load
-make psql_to_neo4j
+make process    # create .sql in ./data
+make psql_load  # load .sql files into postgres
 
 # to Neo4J
 make psql_to_neo4j
+```
+
+### Load a glimpse of Neo4j
+
+```bash
 ```
