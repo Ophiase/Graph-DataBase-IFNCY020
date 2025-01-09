@@ -50,6 +50,16 @@ def execute_queries(graph: Graph, queries: dict) -> None:
 
 
 if __name__ == "__main__":
+    print("""Warning:
+          If a request return "No output". 
+          It suggest that you didn't fill enough the database.
+          My parameters in psql_to_neo4j:
+            MAX_FETCH_BATCH = 10000
+            MAX_FETCH_ITERATION = 10
+          
+          """)
+    print(f"{Fore.YELLOW}{'-'*40}{Style.RESET_ALL}")
+
     graph = connect_neo4j()
     queries = load_queries(QUERY_FOLDER)
     execute_queries(graph, queries)
