@@ -1,3 +1,4 @@
 MATCH (p:Person)-[:KNOWN_FOR]->(w:Work)
-WHERE all(work IN collect(w) WHERE work.start_year > 2000)
-RETURN p, w
+WITH p, collect(w) AS works
+WHERE all(work IN works WHERE work.start_year > 1950)
+RETURN p, works
