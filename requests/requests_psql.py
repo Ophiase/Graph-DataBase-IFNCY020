@@ -12,6 +12,7 @@ VERBOSE = True
 QUERY_FOLDER = "queries_psql"
 LIMIT = 3
 DISABLED = [
+    "shortest_path.sql" # TODO: fix
     "weighted_dijkstra.sql" # TODO: fix
 ]
 

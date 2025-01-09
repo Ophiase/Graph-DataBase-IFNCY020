@@ -13,7 +13,7 @@ WITH RECURSIVE shortest_path AS (
     JOIN 
         name_known_for_titles nkft ON sp.end_id = nkft.id_person
     JOIN 
-        name_basics nb ON nkft.id_work = nb.id_person
+        name_basics nb ON nkft.id_work = -- ERROR, I have to rethink this part
     WHERE 
         nb.name = 'Lauren Bacall'
 )
