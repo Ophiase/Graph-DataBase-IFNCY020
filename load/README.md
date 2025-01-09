@@ -1,10 +1,9 @@
 # Load
 
-
 - Postgres tables
     - ![](resources/tables.png)
 - Neo4J structure:
-    - ?
+    - todo
 
 - Sources :
     - https://kxs.fr/cours/bd/imdb
@@ -13,6 +12,10 @@
     - Remark: I've modified `original_script_from_website.py` to `imbd_to_psql.py`.
 
 ## Installation
+
+Please configure ``config.ini``.
+If you changed the name of the psql database, \
+modify ``$PSQL_DB`` in the ``Makefile``
 
 ### Rebuild everything from scratch
 
@@ -38,4 +41,8 @@ make psql_to_neo4j
 ### Load a glimpse of Neo4j
 
 ```bash
+# to load the ./data/dump.txt
+python3 load_dump.py
+# to create the ./data/dump.txt
+python3 dump.py
 ```
