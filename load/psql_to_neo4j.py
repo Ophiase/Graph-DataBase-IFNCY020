@@ -9,26 +9,26 @@ from psql_tables import Work, Akas, Episode, Genre, WorkType, Person, Profession
 MAX_FETCH_BATCH = 10000
 MAX_FETCH_ITERATION = 5
 VERBOSE = True
-RESET = False
+RESET = True
 
 
 def main() -> None:
     pg_connect = connect_postgresql()
     graph = connect_neo4j()
 
-    # migrate_work(pg_connect, graph)
-    # migrate_akas(pg_connect, graph)
-    # migrate_episode(pg_connect, graph)
+    migrate_work(pg_connect, graph)
+    migrate_akas(pg_connect, graph)
+    migrate_episode(pg_connect, graph)
     add_next_episode(pg_connect, graph)
-    # migrate_genre(pg_connect, graph)
-    # migrate_work_type(pg_connect, graph)
-    # migrate_person(pg_connect, graph)
-    # migrate_profession(pg_connect, graph)
-    # migrate_has_director(pg_connect, graph)
-    # migrate_has_writer(pg_connect, graph)
-    # migrate_known_for(pg_connect, graph)
+    migrate_genre(pg_connect, graph)
+    migrate_work_type(pg_connect, graph)
+    migrate_person(pg_connect, graph)
+    migrate_profession(pg_connect, graph)
+    migrate_has_director(pg_connect, graph)
+    migrate_has_writer(pg_connect, graph)
+    migrate_known_for(pg_connect, graph)
 
-    # create_indexes(graph)
+    create_indexes(graph)
 
 ###################################################################################
 
@@ -49,13 +49,38 @@ def connect_neo4j() -> Graph:
 
 
 def create_indexes(graph) -> None:
-    graph.schema.create_index("Work", "id")
-    graph.schema.create_index("Person", "id_person")
-    # graph.schema.create_index("Akas", "id_work")
-    # graph.schema.create_index("Episode", "id_work")
-    graph.schema.create_index("Genre", "name")
-    # graph.schema.create_index("WorkType", "type")
-    # graph.schema.create_index("Profession", "id_work")
+    create_index(graph, "Work", "id")
+    create_index(graph, "Work", "primary_title")
+    create_index(graph, "Work", "original_title")
+    create_index(graph, "Work", "start_year")
+    create_index(graph, "Work", "end_year")
+    create_index(graph, "Work", "worktype")
+    
+    create_index(graph, "Person", "id_person")
+    create_index(graph, "Person", "name")
+    create_index(graph, "Person", "birth_year")
+    create_index(graph, "Person", "death_year")
+    
+    # create_index(graph, "Akas", "id_work")
+    create_index(graph, "Akas", "title")
+    create_index(graph, "Akas", "region")
+    create_index(graph, "Akas", "language")
+    
+    create_index(graph, "Episode", "season_number")
+    create_index(graph, "Episode", "episode_number")
+    
+    create_index(graph, "Genre", "name")
+    
+    create_index(graph, "WorkType", "type")
+    
+    create_index(graph, "Profession", "category")
+    create_index(graph, "Profession", "job")
+
+
+def create_index(graph, label, property) -> None:
+    query = f"CREATE INDEX FOR (n:{label}) ON (n.{property})"
+    graph.run(query)
+
 ###################################################################################
 
 
