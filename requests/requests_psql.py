@@ -11,6 +11,9 @@ init(autoreset=True)
 VERBOSE = True
 QUERY_FOLDER = "queries_psql"
 LIMIT = 3
+DISABLED = [
+    "weighted_dijkstra.sql" # TODO: fix
+]
 
 ###################################################################################
 
@@ -36,6 +39,10 @@ def load_queries(folder: str) -> dict:
 def execute_queries(pg_connect, queries: dict) -> None:
     with pg_connect.cursor() as cur:
         for name, query in queries.items():
+            if name in DISABLED:
+                print(f"Skip {name}")
+                continue
+
             limited_query = f"{query} \nLIMIT {LIMIT}"
             if VERBOSE:
                 print(f"{Fore.CYAN}Executing query '{name}':{Style.RESET_ALL}")

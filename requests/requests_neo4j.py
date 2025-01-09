@@ -11,6 +11,9 @@ init(autoreset=True)
 VERBOSE = True
 QUERY_FOLDER = "queries_neo4j"
 LIMIT = 1
+DISABLED = [
+    "weighted_dijkstra.cypher" # TODO: fix
+]
 
 ###################################################################################
 
@@ -32,6 +35,10 @@ def load_queries(folder: str) -> dict:
 
 def execute_queries(graph: Graph, queries: dict) -> None:
     for name, query in queries.items():
+        if name in DISABLED:
+            print(f"Skip {name}")
+            continue
+
         limited_query = f"{query} LIMIT {LIMIT}"
         if VERBOSE:
             print(f"{Fore.CYAN}Executing query '{name}':{Style.RESET_ALL}")
