@@ -1,4 +1,5 @@
 # I modified the original script found on the website
+# Based on : https://kxs.fr/files/python/imdb_to_mysql.py
 
 ###################################################################################
 

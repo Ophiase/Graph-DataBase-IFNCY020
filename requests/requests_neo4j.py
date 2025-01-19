@@ -3,6 +3,7 @@ import os
 from py2neo import Graph
 from load.config import NEO4J_AUTH, NEO4J_HOST
 from colorama import Fore, Style, init
+import time
 
 
 ###################################################################################
@@ -45,8 +46,13 @@ def execute_queries(graph: Graph, queries: dict) -> None:
             print()
             print(limited_query)
             print()
+            start_time = time.time()
 
-        records = list(graph.run(limited_query))
+            records = list(graph.run(limited_query))
+
+            end_time = time.time()
+            execution_time = end_time - start_time
+            print(f"{Fore.MAGENTA}Execution time: {execution_time:.4f} seconds{Style.RESET_ALL}")
         if not records:
             print(f"{Fore.RED}No output")
         for record in records:

@@ -3,6 +3,7 @@ import os
 from psycopg2 import connect
 from load.config import PG_DB, PG_HOST, PG_USER, PG_PASSWORD
 from colorama import Fore, Style, init
+import time
 
 
 ###################################################################################
@@ -12,7 +13,7 @@ VERBOSE = True
 QUERY_FOLDER = "queries_psql"
 LIMIT = 3
 DISABLED = [
-    "shortest_path.sql" # TODO: fix
+    "shortest_path.sql", # TODO: fix
     "weighted_dijkstra.sql" # TODO: fix
 ]
 
@@ -51,8 +52,14 @@ def execute_queries(pg_connect, queries: dict) -> None:
                 print(limited_query)
                 print()
 
+            start_time = time.time()
             cur.execute(limited_query)
             records = cur.fetchall()
+            end_time = time.time()
+
+            execution_time = end_time - start_time
+            print(f"{Fore.MAGENTA}Execution time: {execution_time:.4f} seconds{Style.RESET_ALL}")
+
             if not records:
                 print(f"{Fore.RED}No output")
             for record in records:
