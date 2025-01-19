@@ -1,4 +1,4 @@
-# 🎥 Graph DataBase IFNCY020
+# 🎥 [Graph DataBase - IFNCY020](https://github.com/Ophiase/Graph-DataBase-IFNCY020)
 
 This project involves the creation and management of a graph database using Neo4j and PostgreSQL. \
 The dataset includes information about works, persons, genres, episodes, and their relationships.
