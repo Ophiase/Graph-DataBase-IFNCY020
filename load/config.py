@@ -26,4 +26,4 @@ PG_PASSWORD = config["pg_database"]["password"]
 
 #########################################
 
-DUMP = config.get("misc", "dump", fallback="data/dump.txt")
+DUMP = config.get("misc", "dump", fallback="default/dump.txt")
