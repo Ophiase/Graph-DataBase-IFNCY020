@@ -24,6 +24,11 @@ To execute the queries, navigate to the `requests` directory and run the followi
 cd requests
 python3 requests_neo4j.py
 python3 requests_psql.py
+
+# Statistics
+python3 statistics.py
+# Named Graph Statistics (require the named graph)
+python3 named_statistics.py
 ```
 
 These scripts will execute the queries located in the `requests/queries_neo4j` and `requests/queries_psql` directories, respectively.

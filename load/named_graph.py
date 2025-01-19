@@ -17,7 +17,10 @@ def connect_neo4j() -> Graph:
 def create_named_graph(graph) -> None:
     queries = {
         'Graph': """
-            CALL gds.graph.project('Graph', '*', '*');
+            CALL gds.graph.project(
+            'Graph', 
+            '*', 
+            '*');
         """,
         'WorkGraph': """
             CALL gds.graph.project(
