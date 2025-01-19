@@ -3,13 +3,17 @@ from psycopg2 import connect
 from config import PG_DB, PG_HOST, PG_USER, PG_PASSWORD
 from config import NEO4J_AUTH, NEO4J_HOST
 from psql_tables import Work, Akas, Episode, Genre, WorkType, Person, Profession, Director, Writer, KnownFor
+import subprocess
 
 ###################################################################################
 
-MAX_FETCH_BATCH = 10000
-MAX_FETCH_ITERATION = 5
+MAX_FETCH_BATCH = 10000         # DEFAULT: 10000
+MAX_FETCH_ITERATION = 5         # DEFAULT: 5
 VERBOSE = True
-RESET = False
+RESET = False                   # DEFAULT: True
+
+NAMED_GRAPHS_ENABLED = True     # DEFAULT: True
+TRIGGERS_ENABLED = False        # requires apoc configured
 
 
 def main() -> None:
@@ -29,6 +33,12 @@ def main() -> None:
     migrate_known_for(pg_connect, graph)
 
     create_indexes(graph)
+
+    if NAMED_GRAPHS_ENABLED:
+        subprocess.run(["python3", "named_graphs.py"])
+
+    if TRIGGERS_ENABLED:
+        subprocess.run(["python3", "triggers.py"])
 
 ###################################################################################
 
@@ -55,24 +65,24 @@ def create_indexes(graph) -> None:
     create_index(graph, "Work", "start_year")
     create_index(graph, "Work", "end_year")
     create_index(graph, "Work", "worktype")
-    
+
     create_index(graph, "Person", "id_person")
     create_index(graph, "Person", "name")
     create_index(graph, "Person", "birth_year")
     create_index(graph, "Person", "death_year")
-    
+
     # create_index(graph, "Akas", "id_work")
     create_index(graph, "Akas", "title")
     create_index(graph, "Akas", "region")
     create_index(graph, "Akas", "language")
-    
+
     create_index(graph, "Episode", "season_number")
     create_index(graph, "Episode", "episode_number")
-    
+
     create_index(graph, "Genre", "name")
-    
+
     create_index(graph, "WorkType", "type")
-    
+
     create_index(graph, "Profession", "category")
     create_index(graph, "Profession", "job")
 
